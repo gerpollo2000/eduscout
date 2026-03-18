@@ -14,7 +14,7 @@ Deployed and running on DigitalOcean Gradient with VAPI webhook integration.
 Matches official ADK structure + advanced templates (see [gradient-adk-templates](https://github.com/digitalocean/gradient-adk-templates)).
 
 ## Knowledge Base
-EduScout uses a **custom SQL knowledge base** (not DO managed KB) stored in PostgreSQL:
+EduScout uses a **DO Knowledge base** and a **custom SQL knowledge base**  stored in PostgreSQL:
 - `data/schema.sql` → full table structure
 - `data/seed_schools.sql` → initial school dataset
 - `data/migration_day5.sql` & `migration_day8.sql` → schema evolution
