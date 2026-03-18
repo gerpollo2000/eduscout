@@ -1,0 +1,12 @@
+gradient-adk
+gradient
+langchain-core>=0.3.0
+langchain-openai>=0.3.0
+langgraph>=0.2.0
+fastapi
+uvicorn
+psycopg2-binary
+httpx
+python-dotenv
+pydantic
+requests

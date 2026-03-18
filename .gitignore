@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+*venv/
+.env
+
+# Logs and Data
+*.log
+gradient.logs
+vapilog*.json*
+evaluation*.csv
+server.pyOLD
+full_backup.sql
+
