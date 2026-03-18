@@ -55,3 +55,11 @@ pip install -r requirements.txt
 cp .env.example .env
 gradient agent run          # local test
 gradient agent deploy       # production (already done)
+
+# Testing
+
+Webhook: webhook/server.py
+Evaluations: evaluation*.csv
+Logs: gradient.logs
+
+Built with ❤️ using official Gradient ADK docs.
