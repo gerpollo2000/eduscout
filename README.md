@@ -1,69 +1,57 @@
-# Eduscout - DigitalOcean Gradient AI Agent 🎓
+# EduScout — DigitalOcean Gradient ADK Agent
 
-Eduscout is a multi-agent AI system deployed on DigitalOcean using the [DigitalOcean Gradient Agent Development Kit (ADK)](https://docs.digitalocean.com/products/gradient-ai-platform/getting-started/use-adk/). 
+**School discovery + personalized education agent** built with the **Gradient Agent Development Kit (ADK)**.  
+Deployed and running on DigitalOcean Gradient with VAPI webhook integration.
 
-This system helps users find, compare, and analyze schools by leveraging a suite of specialized AI agents, interactive tools (WhatsApp, Vapi), and a robust database knowledge base.
+## Architecture Overview
+- **Entry point**: `main.py` (uses `@entrypoint` decorator — standard ADK)
+- **Multi-agent system**: `agents/` (document_analyst, logistics, mystery_shopper, school_finder, school_comparison, session_manager)
+- **Tools**: `tools/` (database, maps, preference_extractor, vapi_caller, whatsapp, webhook handler)
+- **Webhook server**: `webhook/server.py` (handles VAPI voice sessions)
+- **School portal**: `school_portal/index.html` (frontend demo)
+- **Data layer**: `data/` (PostgreSQL schema + migrations + seed data)
 
-## 🏗️ Architecture & Project Structure
+Matches official ADK structure + advanced templates (see [gradient-adk-templates](https://github.com/digitalocean/gradient-adk-templates)).
 
-Our project follows a modular architecture separating agents, tools, and the webhook interface:
+## Knowledge Base
+EduScout uses a **custom SQL knowledge base** (not DO managed KB) stored in PostgreSQL:
+- `data/schema.sql` → full table structure
+- `data/seed_schools.sql` → initial school dataset
+- `data/migration_day5.sql` & `migration_day8.sql` → schema evolution
+- AI model queries this KB via natural-language-to-SQL in `tools/database.py` + `agents/school_finder.py`.
 
-*   **`agents/`**: Contains the core DO ADK Agent definitions.
-    *   `school_finder.py`: Agent specialized in querying the database for school recommendations.
-    *   `school_comparison.py`: Agent dedicated to comparing metrics between different educational institutions.
-    *   `document_analyst.py`: Handles processing and understanding educational documents.
-    *   `mystery_shopper.py`: Specialized agent for evaluating school responses/interactions.
-    *   `session_manager.py` / `logistics.py`: Orchestrators for user sessions and operational logic.
-*   **`tools/`**: Custom ADK Tools bound to our agents.
-    *   `database.py`: Tool for agents to query our SQL database.
-    *   `maps.py`: Tool for geographic and location-based school queries.
-    *   `whatsapp.py`: Integration for sending/receiving WhatsApp messages.
-    *   `vapi_caller.py`: Voice AI integration using Vapi.
-    *   `preference_extractor.py`: Utility tool to extract user parameters from natural language.
-*   **`webhook/`**: The communication layer.
-    *   `server.py`: The main server handling incoming requests.
-    *   `vapi_webhook_handler.py`: Dedicated endpoints for handling Vapi voice AI webhooks.
-*   **`data/`**: The Knowledge Base. Contains SQL schemas (`schema.sql`) and seed data (`seed_schools.sql`).
+## Agent Functions
+| Agent | Purpose | Key File |
+|-------|--------|----------|
+| school_finder | Finds & ranks schools by preferences | `agents/school_finder.py` |
+| school_comparison | Side-by-side analysis | `agents/school_comparison.py` |
+| document_analyst | Analyzes school PDFs/docs | `agents/document_analyst.py` |
+| mystery_shopper | Simulated school visits | `agents/mystery_shopper.py` |
+| logistics | Session & flow management | `agents/logistics.py` |
+| session_manager | State persistence | `agents/session_manager.py` |
 
-## 🧠 AI Models & Knowledge Base
+All agents use LangGraph-style state passing.
 
-### The Models
-*(Note to author: Specify here which DO Gradient models you are using, e.g., Meta-Llama-3-70B-Instruct or Mixtral-8x7B)*. 
-These models are configured within the `agents/` directory using the `gradient-ai` python package.
+## Tools & Functions
+- `tools/database.py` — AI-powered DB queries (IA model integration)
+- `tools/preference_extractor.py` — Extracts user prefs using LLM
+- `tools/vapi_caller.py` + `webhook/` — Voice interface
+- `tools/maps.py` — Location services
+- `tools/whatsapp.py` — Messaging
 
-### The Knowledge Base
-The agent's knowledge base is grounded in a relational database. 
-*   **Schema**: Found in `data/schema.sql`.
-*   **Seeding**: Initial school data is loaded via `data/seed_schools.sql`.
-*   **Migrations**: Managed iteratively (e.g., `migration_day5.sql`).
-The agents do not rely solely on LLM training data; they use the `database.py` tool to perform RAG (Retrieval-Augmented Generation) and deterministic lookups against this database to ensure zero hallucinations regarding school data.
+## Database (using IA model)
+- **Engine**: PostgreSQL (inferred from SQL files + backup)
+- **IA model integration**: `tools/database.py` + `preference_extractor.py` use the Gradient LLM to:
+  - Translate natural language → SQL
+  - Self-heal failed queries
+  - Enrich results with school rankings
+- Schema documentation: `data/schema.sql` (run it on your DB)
+- Seeded with real school data (`seed_schools.sql`)
 
-## 🚀 Deployment & Setup
-
-This agent is designed to run on a DigitalOcean Droplet.
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/gerpollo2000/eduscout.git
-   cd eduscout
-
-Install dependencies:
-code
-Bash
-python3 -m venv venv
-source venv/bin/activate
+## Setup & Deployment (ADK standard)
+```bash
+# On droplet
 pip install -r requirements.txt
-
-Environment Variables:
-Create a .env file in the root directory (do not commit this file) and include your keys:
-code
-Env
-DIGITALOCEAN_ACCESS_TOKEN=your_do_token
-VAPI_API_KEY=your_vapi_key
-DATABASE_URL=your_db_connection_string
-Run the Application:
-code
-Bash
-python main.py
-# OR for the webhook server
-python webhook/server.py
+cp .env.example .env
+gradient agent run          # local test
+gradient agent deploy       # production (already done)
