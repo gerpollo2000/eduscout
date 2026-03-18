@@ -20,6 +20,28 @@ EduScout uses a **DO Knowledge base** and a **custom SQL knowledge base**  store
 - `data/migration_day5.sql` & `migration_day8.sql` → schema evolution
 - AI model queries this KB via natural-language-to-SQL in `tools/database.py` + `agents/school_finder.py`.
 
+## DigitalOcean Knowledge Base (RAG)
+
+EduScout uses a **managed DigitalOcean Knowledge Base** for retrieval-augmented generation (not custom SQL).  
+All school data, documents, comparisons, and preferences are grounded in this KB.
+
+### KB Details
+| Item                  | Value / Description |
+|-----------------------|---------------------|
+| **Name**             | EduScout Schools KB (or your chosen name) |
+| **UUID**             | `DIGITALOCEAN_KB_UUID` (set in `.env`) |
+| **Embedding Model**  | [Your model, e.g. text-embedding-3-large or DO default] |
+| **Data Sources**     | - Uploaded school PDFs/docs<br>- `seed_schools` data<br>- Web crawl of education sites (if used)<br>- Spaces bucket (optional) |
+| **Chunking**         | Hierarchical / Semantic (configured in DO Control Panel) |
+| **OpenSearch DB**    | Auto-provisioned (region matching your agent) |
+
+**How to recreate the KB** (in case you need to spin up a new workspace):
+1. DigitalOcean Control Panel → **Agent Platform** → **Knowledge Bases** → **Create Knowledge Base**
+2. Choose embedding model
+3. Add data sources (files / Spaces / web crawler)
+4. Create → indexing starts automatically
+5. Copy the UUID from the URL and put in `.env`
+
 ## Agent Functions
 | Agent | Purpose | Key File |
 |-------|--------|----------|
